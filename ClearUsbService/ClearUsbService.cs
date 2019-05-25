@@ -75,7 +75,7 @@ namespace ClearUsb
                     #endregion
 
                     #region 处理ConstrolSet下面的Control键下面的DevicesClasses键值
-                    string[] a5d53fkeys = { "{2da1fe75-aab3-4d2c-acdf-39088cada665}","{325ddf96-938c-11d3-9e34-0080c82727f4}", "{a5dcbf10-6530-11d2-901f-00c04fb951ed}", "{53f56307-b6bf-11d0-94f2-00a0c91efb8b}",};
+                    string[] a5d53fkeys = { "{2da1fe75-aab3-4d2c-acdf-39088cada665}","{325ddf96-938c-11d3-9e34-0080c82727f4}", "{53f56307-b6bf-11d0-94f2-00a0c91efb8b}", "{a5dcbf10-6530-11d2-901f-00c04fb951ed}" };
 
                     //处理HKLM\System\ControlSet\Control\DeviceClasses下面的USB使用记录
                     RegistryKey deviceClassesKey = systemkey.OpenSubKey(key + @"\" + "Control" + @"\" + "DeviceClasses", false);

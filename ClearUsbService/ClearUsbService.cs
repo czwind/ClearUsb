@@ -23,6 +23,7 @@ namespace ClearUsb
             this.RequestAdditionalTime(100000);
             ClearUSBRecordsFromRegistry();
 
+
         }
 
     
@@ -71,6 +72,13 @@ namespace ClearUsb
                                     }
                                 }
                             }
+                            //删除usb打印机 
+                            RegistryKey UsbPRINTKey = enumKey.OpenSubKey("USBPRINT", true);
+                            if (UsbPRINTKey != null)
+                            {
+                                enumKey.DeleteSubKeyTree("USBPRINT");
+                            }
+
                         }
                     #endregion
 

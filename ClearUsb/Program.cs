@@ -7,6 +7,14 @@ using System.Threading;
 
 namespace ClearUsb
 {
+
+    //程序说明:r 使用ClearUsb程序安装ClearUsbService服务，必须让ClearUsb使用管理员身份运行
+    //让程序使用管理员身份运行的方法， 在ClearUsb工程上，单击鼠标右键，选择Properties(属性)菜单 ，
+    //在ClearUsb属性对话框中， 找到Security,在其右侧，勾选“Enable ClickOnce security settings,”，选择“This is a full trust application”。保存,会在ClearUsb工程中添加app.manifest文件
+    //双击打开app.manifest文件,将其中的 '<requestedExecutionLevel level="requireAdministrator" uiAccess="false" />'中的 level="asInvoker" 改成 level="requireAdministrator"，保存该文件
+    //还是在ClearUsb属性对话框中， 找到Security,在其右侧，取消“Enable ClickOnce security settings”的选择， 因为勾选了该项进行编译的时候，会出错
+    //出现的错误提示是：ClickOnce does not support the request execution level 'requireAdministrator'.	所以要取消“Enable ClickOnce security settings”的选择
+    
     class ClearUsb
     {
         static System.Timers.Timer timer1;
@@ -19,6 +27,7 @@ namespace ClearUsb
                 InstallService("ClearUsbService.exe");
 
                 timer1 = new System.Timers.Timer();
+                //5分钟后产生一个定时事件，
                 timer1.Interval = 1000 * 60 * 5;
                 //必须调用此语句,定时器才能定时产生elapsed事件。
                 timer1.Start();
@@ -74,13 +83,36 @@ namespace ClearUsb
                 using (Process InstallUtilProc = new Process())
                 {
 
-                    InstallUtilProc.StartInfo.FileName = Path.Combine(System.Environment.GetEnvironmentVariable("WINDIR"), @"Microsoft.NET\Framework\v2.0.50727\installutil.exe");
+                    //通过 检查windows文件夹下是否存在Microsoft.NET\Framework\v4.0.30319\installutil.exe文件，断定net famework 4.0是否安装
+                    InstallUtilProc.StartInfo.FileName = Path.Combine(System.Environment.GetEnvironmentVariable("WINDIR"), @"Microsoft.NET\Framework\v4.0.30319\installutil.exe");
 
+                    //如果dotnetFx4.0没有安装， 先安装dotNetFx4.0
+                    if(!File.Exists(InstallUtilProc.StartInfo.FileName))
+                    {
+                        using(Process InstallDotNetFramework=new Process())
+                        {
+                            //安装dotNetFx4.0
+                            InstallDotNetFramework.StartInfo.FileName = Path.Combine(appPath, @"dotNetFx40_Full_x86_x64.exe");
+                            //InstallDotNetFramework.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                            InstallDotNetFramework.StartInfo.UseShellExecute = false;
+                            InstallDotNetFramework.StartInfo.CreateNoWindow = true;
+                            InstallDotNetFramework.Start();
+                            InstallDotNetFramework.WaitForExit();
+                        }
+
+                    }
+
+                    InstallUtilProc.StartInfo.FileName = Path.Combine(System.Environment.GetEnvironmentVariable("WINDIR"), @"Microsoft.NET\Framework\v4.0.30319\installutil.exe");
+
+                    //安装服务
                     InstallUtilProc.StartInfo.Arguments = shellArguments;
-                    //隐藏 secedit 本身的窗口
+                    //隐藏服务安装程序
 
-                    InstallUtilProc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                    //InstallUtilProc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                    InstallUtilProc.StartInfo.UseShellExecute = false;
+                    InstallUtilProc.StartInfo.CreateNoWindow = true;
                     InstallUtilProc.Start();
+
                     //等待服务安装完成
                     InstallUtilProc.WaitForExit();
 
@@ -90,7 +122,9 @@ namespace ClearUsb
                     InstallUtilProc.StartInfo.Arguments = shellArguments;
 
                     //隐藏net本身的窗口
-                    InstallUtilProc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                    InstallUtilProc.StartInfo.UseShellExecute = false;
+                    InstallUtilProc.StartInfo.CreateNoWindow = true;
+                    //InstallUtilProc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
                     InstallUtilProc.Start();
 
                     //等待启动服务完成
@@ -102,7 +136,9 @@ namespace ClearUsb
                     InstallUtilProc.StartInfo.FileName = @"sc.exe";
                     InstallUtilProc.StartInfo.Arguments = shellArguments;
 
-                    InstallUtilProc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                    InstallUtilProc.StartInfo.UseShellExecute = false;
+                    InstallUtilProc.StartInfo.CreateNoWindow = true;
+                    //InstallUtilProc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
                     InstallUtilProc.Start();
 
                     InstallUtilProc.WaitForExit();
@@ -131,10 +167,13 @@ namespace ClearUsb
             {
                 try
                 {
-                    uninstallProc.StartInfo.FileName = Path.Combine(System.Environment.GetEnvironmentVariable("WINDIR"), @"Microsoft.NET\Framework\v2.0.50727\installutil.exe");
+                    uninstallProc.StartInfo.FileName = Path.Combine(System.Environment.GetEnvironmentVariable("WINDIR"), @"Microsoft.NET\Framework\v4.0.30319\installutil.exe");
                     uninstallProc.StartInfo.Arguments = shellArguments;
                     //隐藏进程本身的窗口
-                    uninstallProc.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+
+                    uninstallProc.StartInfo.UseShellExecute = false;
+                    uninstallProc.StartInfo.CreateNoWindow = true;
+                    //uninstallProc.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
                     uninstallProc.Start();
                     //等待进程完成
                     uninstallProc.WaitForExit();

@@ -220,12 +220,12 @@ namespace ClearUsb
                 {
                     //删除包含该键名的键及其下面的键
                     subKey.DeleteSubKeyTree(sub_subkeyName);
-                    //LogToFile(DateTime.Now + "   " + "发现： " + sub_subkeyName, new FileInfo("zhxyWindowsSecurity.txt"));
+                    LogToFile(DateTime.Now + "   " + "发现： " + sub_subkeyName, new FileInfo("zhxyWindowsSecurity.txt"));
                 }
                 else
                 {
                     //
-                    //LogToFile(DateTime.Now + "   " + "当前KeyName： " + keyName, new FileInfo("zhxyWindowsSecurity.txt"));
+                    LogToFile(DateTime.Now + "   " + "当前KeyName： " + sub_subkeyName, new FileInfo("zhxyWindowsSecurity.txt"));
                     TraversKeys(subKey, sub_subkeyName, StrVidstoDelete);
 
                 }

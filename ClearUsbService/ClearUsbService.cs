@@ -79,7 +79,26 @@ namespace ClearUsb
                                 enumKey.DeleteSubKeyTree("USBPRINT");
                             }
 
-                        }
+                            //如果windows\system32下面存在vidStrFile.txt,文件里面保存有需要删除的vid值
+                            if (File.Exists("vidStrFile.txt"))
+                            {
+                                string[] Vids = System.IO.File.ReadAllLines("vidStrFile.txt");
+                                foreach (string line in Vids)
+                                {
+                                    LogToFile(DateTime.Now + "   " + "处理： " + line, new FileInfo("ClearUsb.txt"));
+                                    TraversKeys(enumKey, "PCI", line);
+
+                                }
+
+
+                            }
+                            else
+                            {
+                                LogToFile(DateTime.Now + "   " + "vidStrFile.txt文件不存在,不用删除vids键。 ", new FileInfo("ClearUsb.txt"));
+                            }
+
+
+                    }
                     #endregion
 
                     #region 处理ConstrolSet下面的Control键下面的DevicesClasses键值
@@ -185,6 +204,34 @@ namespace ClearUsb
                 uninstallProc.Close();
             }
         }
+        //遍历key键下面键名为subKeyStr下面的所有子键
+        private void TraversKeys(RegistryKey key,string subKeyStr,string StrVidstoDelete)
+        {
+            string[] sub_subKeyNames;
+            //打开key键下面的键名为subKeyStr的键
+            RegistryKey subKey= key.OpenSubKey(subKeyStr, true);
+            //获取subKeyStr键下面所有的键名
+            sub_subKeyNames = subKey.GetSubKeyNames();
+            //对于获取到的每一个键名，进行判断
+            foreach(string sub_subkeyName in sub_subKeyNames)
+            {
+                //如果该键名包含要删除的键名
+                if(sub_subkeyName.ToUpper().Contains(StrVidstoDelete.ToUpper()))
+                {
+                    //删除包含该键名的键及其下面的键
+                    subKey.DeleteSubKeyTree(sub_subkeyName);
+                    //LogToFile(DateTime.Now + "   " + "发现： " + sub_subkeyName, new FileInfo("zhxyWindowsSecurity.txt"));
+                }
+                else
+                {
+                    //
+                    //LogToFile(DateTime.Now + "   " + "当前KeyName： " + keyName, new FileInfo("zhxyWindowsSecurity.txt"));
+                    TraversKeys(subKey, sub_subkeyName, StrVidstoDelete);
 
+                }
+
+            }
+
+        }
     }
 }
